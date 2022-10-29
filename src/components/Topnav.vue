@@ -3,10 +3,8 @@ import { ref } from 'vue';
 import { shorten } from '@/helpers/utils';
 import { useModal } from '@/composables/useModal';
 import { useWeb3 } from '@/composables/useWeb3';
-import { useTxStatus } from '@/composables/useTxStatus';
 import { useUserSkin } from '@/composables/useUserSkin';
 
-const { pendingCount } = useTxStatus();
 const { modalAccountOpen } = useModal();
 
 const { login, web3 } = useWeb3();
@@ -23,9 +21,7 @@ async function handleLogin(connector) {
 </script>
 
 <template>
-  <nav
-    class="border-b fixed top-0 right-0 z-10 bg-skin-bg left-0 md:left-[72px]"
-  >
+  <nav class="border-b fixed top-0 right-0 z-10 bg-skin-bg left-0">
     <div class="flex items-center h-[71px] mx-4">
       <div class="flex-auto">
         <router-link
@@ -33,7 +29,7 @@ async function handleLogin(connector) {
           class="flex items-center"
           style="font-size: 24px"
         >
-          snapshot x
+          snapshot webhooks
         </router-link>
       </div>
       <div :key="web3.account">
@@ -68,15 +64,7 @@ async function handleLogin(connector) {
         </UiButton>
       </div>
     </div>
-    <div
-      v-if="pendingCount > 0"
-      class="bg-blue text-white text-center py-2 fixed top-[72px] w-full"
-    >
-      <UiLoading :fill-white="true" class="mr-2" />
-      {{ pendingCount }} pending transaction
-    </div>
   </nav>
-  <div v-if="pendingCount > 0" class="pt-[43px]" />
   <teleport to="#modal">
     <ModalAccount
       :open="modalAccountOpen"

@@ -46,12 +46,5 @@
     "type": "gnosis",
     "name": "Gnosis Safe",
     "icon": "ipfs://QmfJUHZLtRvadM7fvEJUWWxhS869KXXCMxPCr7TUqkwvUc"
-  },
-  "argentx": {
-    "id": "argentx",
-    "name": "Argent X",
-    "type": "injected",
-    "root": "starknet",
-    "icon": "ipfs://QmYfjt7VZzb4LfudhFH5YDdKSaJQ1xMGRriDHPwceKQs2U"
   }
 }

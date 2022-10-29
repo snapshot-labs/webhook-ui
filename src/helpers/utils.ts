@@ -111,44 +111,6 @@ export function _rt(number) {
   }
 }
 
-export function abiToDefinition(abi) {
-  const definition = {
-    title: abi.name,
-    type: 'object',
-    properties: {},
-    additionalProperties: false
-  };
-  abi.inputs.forEach(input => {
-    definition.properties[input.name] = {};
-    let type = 'string';
-    if (input.type === 'bool') type = 'boolean';
-    if (input.type === 'uint256') {
-      definition.properties[input.name].format = 'uint256';
-      definition.properties[input.name].examples = ['0'];
-    }
-    if (input.type === 'int256') {
-      definition.properties[input.name].format = 'int256';
-      definition.properties[input.name].examples = ['0'];
-    }
-    if (input.type === 'address') {
-      definition.properties[input.name].format = 'address';
-      definition.properties[input.name].examples = ['0x0000…'];
-    }
-    definition.properties[input.name].type = type;
-    definition.properties[input.name].title = `${input.name} (${input.type})`;
-  });
-  return definition;
-}
-
-export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  const entries = Object.entries(obj) as [K, any];
-
-  return Object.fromEntries(entries.filter(([k]) => !keys.includes(k))) as Omit<
-    T,
-    K
-  >;
-}
-
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }

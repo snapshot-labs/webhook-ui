@@ -1,36 +1,32 @@
 <script setup>
-import { reactive, ref, computed, watch } from 'vue';
-import { isAddress } from '@ethersproject/address';
-import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
+import { reactive, computed } from 'vue';
 import { clone } from '@/helpers/utils';
-import { validateForm } from '@/helpers/validation';
-import { useWeb3 } from '@/composables/useWeb3';
 import { useClient } from '@/composables/useClient';
-
-const { send, isSending } = useClient();
-
-const DEFAULT_FORM_STATE = {
-  space: {},
-  url: ''
-};
+import { validateForm } from '@/helpers/validation';
+import { useFlashNotification } from '@/composables/useFlashNotification';
 
 const props = defineProps({
   open: Boolean,
   initialState: Object,
-  spaces: Object // NOTE(zzuziak): can have multiple subs for one space - different URL, display all
+  spaces: Object
 });
 
-const emit = defineEmits(['add', 'close']);
+const DEFAULT_FORM_STATE = {
+  space: '',
+  url: ''
+};
 
-const loading = ref(false);
-const ignoreFormUpdates = ref(true);
+const { send } = useClient();
+const { notify } = useFlashNotification();
+
+const emit = defineEmits(['add', 'close']);
 
 const form = reactive(clone(DEFAULT_FORM_STATE));
 
 const url = computed(() => {
   if (form.url.value) {
     try {
-      new URL(form.url.value)
+      new URL(form.url.value);
     } catch (_) {
       return false;
     }
@@ -39,58 +35,39 @@ const url = computed(() => {
   return url;
 });
 
-
-async function handleSubmit() {
-  console.log(form)
-  console.log("URL", form.url)
-
-  // if (!isValid.value)
-  //   return console.log('Invalid schema', validationResult.value);
-
-  const result = await send({ space: form.space, url: form.url, active: 1, type: "addSubscription" });
-  console.log('Result', result.success);
-  if (result.success) {
-    emit('emit')
-  }
-}
+const formValid = computed(
+  () => form.space !== '' && form.url && !Object.keys(errors.value).length
+);
 
 const errors = computed(() =>
   validateForm(
     {
       type: 'object',
       properties: {
+        space: {
+          type: 'string'
+        },
         url: {
           type: 'string',
-          // format: 'url'
-        },
-        space: {
-          type: 'object'
+          format: 'url'
         }
       },
-      required: ['url', 'space']
+      additionalProperties: true,
+      required: ['space', 'url']
     },
     { url: form.url, space: form.space }
   )
 );
 
-
-
-watch(
-  () => props.open,
-  () => {
-    if (props.initialState) {
-      form.space = props.initialState.space;
-      form.url = props.initialState.url;
-
-      ignoreFormUpdates.value = true;
-    } else {
-      form.space = DEFAULT_FORM_STATE.space;
-      form.url = DEFAULT_FORM_STATE.url;
-
-      ignoreFormUpdates.value = false;
-    }
-  }
-);
+async function handleSubmit() {
+  const result = await send({
+    space: form.space,
+    url: form.url,
+    type: 'addSubscription'
+  });
+  if (!result.status) notify(['red', 'Something went wrong']);
+  emit('close');
+}
 </script>
 
 <template>
@@ -102,24 +79,31 @@ watch(
       <div class="s-base">
         <div class="s-label" v-text="'Space'" />
         <select v-model="form.space" class="s-input h-[45px] w-full">
-          <option v-for="space in spaces" :key="space.id" :value="space.id" v-text="space.name" />
+          <option
+            v-for="space in props.spaces"
+            :key="space.id"
+            :value="space.id"
+            :error="errors.space"
+            v-text="space.name"
+          />
         </select>
       </div>
       <div class="relative w-full">
-        <UiLoading v-if="loading" class="absolute top-[14px] z-10" />
         <SIString
           v-model="form.url"
-          :error="errors.url"
           :definition="{
             type: 'string',
             title: 'Your webhook url',
             examples: ['https://domain.com/endpoint']
           }"
+          :error="errors.url"
         />
       </div>
     </div>
     <template #footer>
-      <UiButton class="w-full" @click="handleSubmit">Confirm</UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+        Confirm
+      </UiButton>
     </template>
   </UiModal>
 </template>
