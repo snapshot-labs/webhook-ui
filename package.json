@@ -8,7 +8,6 @@
     "build": "vite build",
     "lint:nofix": "eslint \"./src/**/*.{ts,vue,json}\"",
     "lint": "yarn lint:nofix --fix",
-    "test:unit": "vitest",
     "electron:start": "electron ."
   },
   "dependencies": {
