@@ -4,6 +4,7 @@ node_modules
 /coverage
 .yalc
 components.d.ts
+.env
 
 # local env files
 .env.local
